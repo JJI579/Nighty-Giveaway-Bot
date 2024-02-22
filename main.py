@@ -135,19 +135,16 @@ class GiveawayEntry(discord.ui.View):
         super().__init__(timeout=None, auto_defer=True)
         self.add_item(GiveawayEntry_button(self.giveaway))
 
-
-
-
 durationOptions = {
     "Seconds": 1,
     "Minutes": 60, 
     "Hours": 3600,
     "Days": 86400,
-    "Weeks": 604800
+    "Weeks": 604800,
+    "Years": 31556952
 }
 
 database = Database()
-
 
 async def giveaway_finish(giveaway: dict):
     endingAt = parser.parse(giveaway['endsAt']).timestamp()
@@ -204,8 +201,12 @@ async def startCMD(interaction: discord.Interaction, title, description, duratio
 async def favorite_dog(interaction: Interaction, duration: str):
     inf = re.findall("([0-9]+)", duration)
     if inf:
-        return await interaction.response.send_autocomplete([f'{inf[0]} {a if inf[0] != "1" else a[:-1]}' for a in durationOptions.keys()])
-    return await interaction.response.send_autocomplete(["Enter Numbers"])
+        if str(inf[0]).isdigit():
+            return await interaction.response.send_autocomplete([f'{inf[0]} {a if inf[0] != "1" else a[:-1]}' for a in durationOptions.keys()])
+        for option in durationOptions.keys():
+            if option[0] in duration:
+                return await interaction.response.send_autocomplete([f'{inf[0]} {option if inf[0] != "1" else option[:-1]}'])
+    return await interaction.response.send_autocomplete(["Enter your desired duration"])
 
 from playwright.async_api import async_playwright
 
